@@ -106,7 +106,7 @@ class unifying_dongle:
     else:
 
       # Get the dongle instance (already in firmware update mode)
-      self.dongle = usb.core.find(idVendor=0x046d, idProduct=0xaaaa)
+      self.dongle = usb.core.find(idVendor=0x046d, idProduct=0xaaad)
       if not self.dongle:
         raise Exception("Unable to find Logitech Unifying USB dongle.")
 
@@ -127,19 +127,19 @@ class unifying_dongle:
     # when a Logitech dongle is first plugged in (and not used as an HID/HID++ device).
     # The following code makes everything work, but it's magic for the moment.
     try:
-      self.send_command(0x21, 0x09, 0x0210, 0x0002, "\x10\xFF\x81\xF1\x00\x00\x00", ep=0x83)
+      self.send_command(0x21, 0x09, 0x0210, 0x0002, b"\x10\xFF\x81\xF1\x00\x00\x00", ep=0x83)
     except Exception:
       pass
 
     # Request the firmware version
-    response = self.send_command(0x21, 0x09, 0x0210, 0x0002, "\x10\xFF\x81\xF1\x01\x00\x00", ep=0x83)
-    if response[5] != 0x12:
+    response = self.send_command(0x21, 0x09, 0x0210, 0x0002, b"\x10\xFF\x81\xF1\x01\x00\x00", ep=0x83)
+    if response[5] != 0x24:
       logging.info('Incompatible Logitech Unifying dongle (type {:02X}). Only Nordic Semiconductor based dongles are supported.'.format(response[5]))
       sys.exit(1)
 
     # Tell the dongle to reset into firmware update mode
     try:
-      self.send_command(0x21, 0x09, 0x0210, 0x0002, "\x10\xFF\x80\xF0\x49\x43\x50", ep=0x83)
+      self.send_command(0x21, 0x09, 0x0210, 0x0002, b"\x10\xFF\x80\xF0\x49\x43\x50", ep=0x83)
     except usb.core.USBError:
 
       # An I/O error is possible here when the device resets before we can read the USB response
@@ -151,7 +151,7 @@ class unifying_dongle:
       try:
 
         # Get the dongle instance
-        self.dongle = usb.core.find(idVendor=0x046d, idProduct=0xaaaa)
+        self.dongle = usb.core.find(idVendor=0x046d, idProduct=0xaaad)
         if self.dongle:
           logging.info("Found Logitech Unifying dongle - firmware update mode")
 

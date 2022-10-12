@@ -37,9 +37,6 @@ with open(path) as f:
   payloads = [b"\x20" + decode_hex(line)[0] + bytearray(62-len(line)) for line in lines]
   payloads[0] = payloads[0][0:2] + bytes([payloads[0][2] + 1, payloads[0][3] - 1]) + payloads[0][5:]
 
-
-print(payloads[0])
-
 # Add the firmware CRC
 payloads.append(b'\x20\x67\xFE\x02' + struct.pack('!H', crc) + bytearray(26))
 
@@ -53,7 +50,8 @@ response = dongle.send_command(0x21, 0x09, 0x0200, 0x0000, b"\x80" + bytearray(3
 # # Clear the existing flash memory up to the size of the new firmware image
 logging.info("Clearing existing flash memory up to boootloader")
 for x in range(0, 0x70, 2):
-  response = dongle.send_command(0x21, 0x09, 0x0200, 0x0000, b"\x30" + chr(x) + b"\x00\x01" + bytearray(28))
+  response = dongle.send_command(0x21, 0x09, 0x0200, 0x0000, bytes([30, x, 0, 1]) + bytearray(28))
+
 
 # Send the data
 logging.info("Transferring the new firmware")
@@ -68,3 +66,4 @@ response = dongle.send_command(0x21, 0x09, 0x0200, 0x0000, b"\x20\x00\x00\x01\x0
 # Restart the dongle
 logging.info("Restarting dongle into research firmware mode")
 response = dongle.send_command(0x21, 0x09, 0x0200, 0x0000, b"\x70" + bytearray(31))
+
